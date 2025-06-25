@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Rapor Qur'an - SDIT Insan Madani</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* slate-100 */
+        }
+        .sidebar-active {
+            background-color: #0d9488; /* teal-600 */
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar-link:hover {
+            background-color: #0f766e; /* teal-700 */
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a1a1aa; /* zinc-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #71717a; /* zinc-500 */
+        }
+        .f4-paper {
+            background: white;
+            width: 21.5cm;
+            min-height: 33cm;
+            padding: 1.5cm;
+            margin: 2rem auto;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: 'Times New Roman', Times, serif;
+        }
+        @page {
+            size: 21.5cm 33cm;
+            margin: 1.5cm;
+        }
+        @media print {
+            body, html {
+                background: white;
+            }
+            .no-print {
+                display: none;
+            }
+            #rapor-print-area {
+                visibility: visible;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+                font-family: 'Times New Roman', Times, serif;
+            }
+            #rapor-print-area * {
+                visibility: visible;
+            }
+            .print-bg-transparent {
+                background-color: transparent !important;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div id="login-screen" class="flex items-center justify-center h-screen bg-slate-100">
+        <div class="text-center p-10 bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <img src="https://placehold.co/80x80/ffffff/0d9488?text=IM" alt="Logo SDIT Insan Madani" class="rounded-full mx-auto mb-4">
+            <h1 class="text-3xl font-bold text-teal-800">E-Rapor Qur'an</h1>
+            <p class="text-slate-500 mb-8">SDIT Insan Madani</p>
+            <p id="auth-status" class="mb-4 text-sm text-slate-600">Silakan login untuk melanjutkan.</p>
+            <button id="login-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center w-full shadow-md">
+                <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#fbc02d" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12	s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20	s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#e53935" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039	l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4caf50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36	c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1565c0" d="M43.611,20.083L43.595,20L42,20H24v8h11.303c-0.792,2.237-2.231,4.166-4.089,5.574	l6.19,5.238C39.99,35.536,44,30.168,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                Login dengan Google
+            </button>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden h-screen bg-slate-100 no-print">
+        <div class="flex flex-1">
+            <aside class="w-64 flex-shrink-0 bg-teal-800 text-white flex flex-col">
+                <div class="h-20 flex items-center justify-between border-b border-teal-700 px-4">
+                     <div class="flex items-center">
+                        <img id="user-avatar" src="" alt="User Avatar" class="rounded-full mr-3 h-10 w-10">
+                        <div class="flex flex-col">
+                           <span id="user-name" class="font-bold text-sm"></span>
+                           <span class="text-xs text-teal-200">Guru</span>
+                        </div>
+                     </div>
+                     <button id="logout-btn" title="Logout" class="text-teal-300 hover:text-white">
+                         <i data-lucide="log-out" class="h-5 w-5"></i>
+                     </button>
+                </div>
+                <nav id="sidebar-navigation" class="flex-grow p-4 space-y-2">
+                    <a href="#" data-tab="input-siswa" class="sidebar-link sidebar-active flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                        <i data-lucide="user-plus" class="mr-3 h-5 w-5"></i> Input Siswa
+                    </a>
+                     <a href="#" data-tab="hafalan-materi" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="book-check" class="mr-3 h-5 w-5"></i> Hafalan & Materi
+                    </a>
+                    <a href="#" data-tab="penilaian-harian" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="clipboard-list" class="mr-3 h-5 w-5"></i> Nilai Harian
+                    </a>
+                    <a href="#" data-tab="penilaian-pts" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="file-check-2" class="mr-3 h-5 w-5"></i> Nilai PTS
+                    </a>
+                    <a href="#" data-tab="penilaian-pas" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="file-check" class="mr-3 h-5 w-5"></i> Nilai PAS
+                    </a>
+                    <a href="#" data-tab="catatan-guru" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="pencil-ruler" class="mr-3 h-5 w-5"></i> Catatan Guru
+                    </a>
+                    <a href="#" data-tab="export-rapor" class="sidebar-link text-teal-100 hover:text-white flex items-center py-2.5 px-4 rounded-lg transition duration-200">
+                         <i data-lucide="file-export" class="mr-3 h-5 w-5"></i> Export Rapor
+                    </a>
+                </nav>
+            </aside>
+
+            <main class="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10">
+                <div id="main-header" class="flex justify-between items-center mb-8">
+                    <h1 id="page-title" class="text-3xl font-bold text-slate-800">Data Siswa</h1>
+                </div>
+                
+                <div id="tab-content">
+                     <div id="input-siswa-content" class="tab-panel bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                            <div class="relative">
+                                <label for="nama_siswa_search" class="block text-sm font-medium text-gray-600 mb-1">Nama Siswa</label>
+                                <input type="text" id="nama_siswa_search" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" placeholder="Memuat data siswa...">
+                                <div id="nama_siswa_dropdown" class="absolute z-10 w-full bg-white border rounded-lg mt-1 hidden max-h-60 overflow-y-auto shadow-lg">
+                                    </div>
+                                <input type="hidden" id="nama_siswa">
+                            </div>
+                            <div>
+                                <label for="nisn" class="block text-sm font-medium text-gray-600 mb-1">NIS/NISN</label>
+                                <input type="text" id="nisn" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 transition" placeholder="Otomatis terisi" readonly>
+                            </div>
+                             <div>
+                                <label for="kelas" class="block text-sm font-medium text-gray-600 mb-1">Kelas</label>
+                                <input type="text" id="kelas" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 transition" placeholder="Otomatis terisi" readonly>
+                            </div>
+                            <div>
+                                <label for="semester" class="block text-sm font-medium text-gray-600 mb-1">Semester</label>
+                                <select id="semester" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition bg-white">
+                                    <option value="1 (Ganjil)">1 (Ganjil)</option>
+                                    <option value="2 (Genap)" selected>2 (Genap)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-4">
+                            <button id="update-student-data-btn" class="bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center shadow-md">
+                                <i data-lucide="refresh-cw" class="mr-2 h-5 w-5"></i>
+                                Perbarui Data
+                            </button>
+                            <button id="add-student-btn" class="bg-teal-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-teal-700 transition duration-300 flex items-center shadow-md">
+                                <i data-lucide="plus-circle" class="mr-2 h-5 w-5"></i>
+                                Tambah Siswa
+                            </button>
+                        </div>
+                        
+                        <div class="mt-10">
+                            <h2 class="text-xl font-bold text-slate-700 mb-4 border-b pb-2">Daftar Siswa yang Akan Diproses</h2>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white">
+                                    <thead class="bg-slate-50">
+                                        <tr>
+                                            <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No</th>
+                                            <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Siswa</th>
+                                            <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIS/NISN</th>
+                                            <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kelas</th>
+                                            <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="saved-students-table-body">
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-gray-500 italic">Belum ada siswa yang ditambahkan.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="hafalan-materi-content" class="tab-panel hidden space-y-6">
+                         <div class="text-center text-gray-500 italic p-8 bg-white rounded-lg shadow">Tambahkan siswa di tab 'Input Siswa' terlebih dahulu.</div>
+                    </div>
+
+                    <div id="penilaian-harian-content" class="tab-panel hidden space-y-8"></div>
+                    <div id="penilaian-pts-content" class="tab-panel hidden space-y-8"></div>
+                    <div id="penilaian-pas-content" class="tab-panel hidden space-y-8"></div>
+
+                    <div id="catatan-guru-content" class="tab-panel hidden">
+                         <div class="mb-6">
+                            <label for="student-select-catatan" class="block text-sm font-medium text-gray-700 mb-1">Pilih Siswa</label>
+                            <select id="student-select-catatan" class="student-select-penilaian w-full p-3 border border-gray-300 rounded-lg bg-white">
+                                <option value="">-- Pilih Siswa --</option>
+                            </select>
+                        </div>
+                         <div class="flex flex-col lg:flex-row items-start justify-between mb-6">
+                            <p class="text-gray-600 mb-4 lg:mb-0 max-w-lg">Deskripsi perkembangan siswa akan dibuat secara otomatis berdasarkan nilai akhir semester yang telah diinput. Klik tombol di samping untuk memulai.</p>
+                            <button id="generate-catatan-btn" class="w-full lg:w-auto bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-600 hover:to-emerald-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center">
+                                <i data-lucide="sparkles" class="mr-3"></i> Buat Catatan Ajaib
+                            </button>
+                        </div>
+                        <div class="border-2 border-teal-200 rounded-2xl p-6 bg-white min-h-[300px] shadow-lg">
+                            <h3 class="font-extrabold text-2xl mb-4 text-slate-800">Catatan untuk: <span id="catatan_nama_siswa" class="text-teal-600">-</span></h3>
+                            <textarea id="catatan_otomatis" class="w-full h-56 p-2 text-lg leading-relaxed border-none rounded-md bg-white focus:ring-0 resize-none text-slate-600" readonly placeholder="Pilih siswa dan klik 'Buat Catatan Ajaib'..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div id="export-rapor-content" class="tab-panel hidden">
+                         <div class="mb-6">
+                            <label for="student-select-export" class="block text-sm font-medium text-gray-700 mb-1">Pilih Siswa untuk Ditampilkan</label>
+                            <select id="student-select-export" class="student-select-penilaian w-full p-3 border border-gray-300 rounded-lg bg-white">
+                                <option value="">-- Pilih Siswa --</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col lg:flex-row items-start justify-between mb-6">
+                            <p class="text-gray-600 mb-4 lg:mb-0 max-w-lg">Pastikan semua data penilaian telah diisi dengan benar. Klik tombol di samping untuk memproses dan menampilkan pratinjau rapor yang siap dicetak.</p>
+                            <div class="flex space-x-4">
+                                <button id="process-rapor-btn" class="w-full lg:w-auto bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center">
+                                    <i data-lucide="play" class="mr-3"></i> Proses & Tampilkan Rapor
+                                </button>
+                                <button id="print-rapor-btn" class="w-full lg:w-auto bg-gray-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center">
+                                    <i data-lucide="printer" class="mr-3"></i> Cetak Rapor
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-200 p-8 rounded-2xl overflow-x-auto">
+                            <div id="rapor-preview-container" class="f4-paper">
+                                <div class="text-center text-gray-500 italic">Pilih siswa dan klik 'Proses & Tampilkan Rapor' untuk melihat pratinjau.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <div id="rapor-print-area" class="hidden"></div>
+
+    <script>
+        // ===================================================================================
+        // BAGIAN 1: KONFIGURASI DAN LOGIKA OTENTIKASI GOOGLE
+        // ===================================================================================
+
+        // !!! PENTING: Ganti dengan Client ID yang Anda dapatkan dari Google Cloud Console !!!
+        const CLIENT_ID = 'GANTI_DENGAN_CLIENT_ID_ANDA.apps.googleusercontent.com'; 
+        
+        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/people/v1/rest"];
+        const SCOPES = 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        const loginScreen = document.getElementById('login-screen');
+        const mainApp = document.getElementById('main-app');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const authStatus = document.getElementById('auth-status');
+
+        window.onload = () => {
+            // Memuat Google API Client
+            const gapiScript = document.createElement('script');
+            gapiScript.src = 'https://apis.google.com/js/api.js';
+            gapiScript.async = true;
+            gapiScript.defer = true;
+            gapiScript.onload = gapiLoaded;
+            document.body.appendChild(gapiScript);
+
+            // Memuat Google Identity Services (GIS)
+            const gisScript = document.createElement('script');
+            gisScript.src = 'https://accounts.google.com/gsi/client';
+            gisScript.async = true;
+            gisScript.defer = true;
+            gisScript.onload = gisLoaded;
+            document.body.appendChild(gisScript);
+        };
+
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                discoveryDocs: DISCOVERY_DOCS,
+            });
+            gapiInited = true;
+            maybeEnableButtons();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // Callback akan di-handle dalam promise
+            });
+            gisInited = true;
+            maybeEnableButtons();
+        }
+
+        function maybeEnableButtons() {
+            if (gapiInited && gisInited) {
+                loginBtn.onclick = handleAuthClick;
+                logoutBtn.onclick = handleSignoutClick;
+            }
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                authStatus.innerText = 'Login berhasil, memuat data pengguna...';
+                await updateSigninStatus(true);
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+        
+        function handleSignoutClick() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token, () => {
+                    gapi.client.setToken('');
+                    updateSigninStatus(false);
+                });
+            }
+        }
+        
+        async function updateSigninStatus(isSignedIn) {
+            if (isSignedIn) {
+                // Tampilkan aplikasi utama, sembunyikan layar login
+                loginScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.classList.add('flex');
+                
+                // Ambil data profil pengguna
+                const response = await gapi.client.people.people.get({
+                    'resourceName': 'people/me',
+                    'personFields': 'names,photos',
+                });
+                
+                const profile = response.result;
+                document.getElementById('user-name').textContent = profile.names && profile.names.length > 0 ? profile.names[0].displayName : 'Pengguna';
+                document.getElementById('user-avatar').src = profile.photos && profile.photos.length > 0 ? profile.photos[0].url : 'https://placehold.co/40x40';
+
+                // Jalankan fungsi utama aplikasi setelah login berhasil
+                initializeApp();
+
+            } else {
+                // Tampilkan layar login, sembunyikan aplikasi
+                loginScreen.classList.remove('hidden');
+                mainApp.classList.add('hidden');
+                mainApp.classList.remove('flex');
+                authStatus.innerText = 'Silakan login untuk melanjutkan.';
+            }
+        }
+
+        // ===================================================================================
+        // BAGIAN 2: LOGIKA APLIKASI E-RAPOR ANDA (YANG SUDAH ADA SEBELUMNYA)
+        // ===================================================================================
+        
+        function initializeApp() {
+            // SEMUA KODE JAVASCRIPT LAMA ANDA DIMULAI DARI SINI
+            lucide.createIcons();
+            
+            let studentData = [];
+            let savedStudents = [];
+            let tahsinMateriList = [];
+            const studentSearchInput = document.getElementById('nama_siswa_search');
+            const studentDropdown = document.getElementById('nama_siswa_dropdown');
+            const studentNameHidden = document.getElementById('nama_siswa');
+            const nisnInput = document.getElementById('nisn');
+            const kelasInput = document.getElementById('kelas');
+            
+            async function fetchStudentData() {
+                const sheetId = "1rGTti5j9yV5eZ9Suhn5jW5cbFRC9XszSZmsw6wC-deE";
+                const googleSheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(googleSheetUrl)}`;
+                
+                try {
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error(`Gagal mengambil data, Status: ${response.status}`);
+                    const csvText = await response.text();
+                    
+                    const rows = csvText.trim().split('\n').slice(1);
+                    studentData = rows.map(row => {
+                        const columns = row.split(',');
+                        return {
+                            nama: columns[0] ? columns[0].trim().replace(/"/g, '') : '',
+                            nisn: columns[1] ? columns[1].trim().replace(/"/g, '') : '',
+                            kelas: columns[2] ? columns[2].trim().replace(/"/g, '') : ''
+                        };
+                    }).filter(student => student.nama); 
+
+                    if (studentData.length === 0) throw new Error("Tidak ada data siswa yang valid ditemukan.");
+                    
+                    studentSearchInput.placeholder = "Cari nama siswa...";
+                    studentSearchInput.disabled = false;
+                    populateStudentDropdown(studentData);
+                } catch (error) {
+                    console.error("Error saat mengambil data siswa:", error);
+                    studentSearchInput.placeholder = "Gagal memuat data siswa";
+                    studentSearchInput.disabled = true;
+                    studentDropdown.innerHTML = `<div class="p-3 text-red-500">Gagal memuat data. Pastikan Google Sheet dapat diakses publik.</div>`;
+                    studentDropdown.classList.remove('hidden');
+                }
+            }
+
+            async function fetchTahsinMateri() {
+                 const sheetId = "16M2ueVhsZoCL8to88rzYhQMSsBGvRtdxeo4d3_qLjFY";
+                 const googleSheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(googleSheetUrl)}`;
+                 try {
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error(`Gagal mengambil data materi, Status: ${response.status}`);
+                    const csvText = await response.text();
+                    const rows = csvText.trim().split('\n').slice(1);
+                    tahsinMateriList = rows.map(row => row.split(',')[0].trim().replace(/"/g, '')).filter(materi => materi);
+                 } catch (error) {
+                    console.error("Error fetching tahsin materi:", error);
+                    tahsinMateriList = ['Mad', 'Hamzah Washol', 'Waqof', 'Nun Sukun/Tanwin'];
+                 }
+            }
+
+            function populateStudentDropdown(students) {
+                studentDropdown.innerHTML = '';
+                if (students.length === 0) {
+                     studentDropdown.innerHTML = `<div class="p-3 text-gray-500">Tidak ada hasil ditemukan.</div>`;
+                     return;
+                }
+                students.forEach(student => {
+                    const item = document.createElement('div');
+                    item.className = 'p-3 hover:bg-teal-50 cursor-pointer';
+                    item.textContent = student.nama;
+                    item.addEventListener('click', () => {
+                        studentSearchInput.value = student.nama;
+                        studentNameHidden.value = student.nama;
+                        nisnInput.value = student.nisn;
+                        kelasInput.value = student.kelas;
+                        studentDropdown.classList.add('hidden');
+                    });
+                    studentDropdown.appendChild(item);
+                });
+            }
+
+            studentSearchInput.addEventListener('input', () => {
+                const query = studentSearchInput.value.toLowerCase();
+                const filteredStudents = studentData.filter(student => student.nama.toLowerCase().includes(query));
+                populateStudentDropdown(filteredStudents);
+                studentDropdown.classList.remove('hidden');
+            });
+            
+            studentSearchInput.addEventListener('focus', () => {
+                if (!studentSearchInput.value) populateStudentDropdown(studentData);
+                studentDropdown.classList.remove('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                const searchContainer = studentSearchInput.parentElement;
+                if (searchContainer && !searchContainer.contains(e.target)) studentDropdown.classList.add('hidden');
+            });
+            
+            const addStudentBtn = document.getElementById('add-student-btn');
+            const savedStudentsTableBody = document.getElementById('saved-students-table-body');
+
+            function renderSavedStudentsTable() {
+                savedStudentsTableBody.innerHTML = '';
+                if (savedStudents.length === 0) {
+                    savedStudentsTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500 italic">Belum ada siswa yang ditambahkan.</td></tr>';
+                    return;
+                }
+
+                savedStudents.forEach((student, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b';
+                    row.innerHTML = `
+                        <td class="py-2 px-4">${index + 1}</td>
+                        <td class="py-2 px-4">${student.nama}</td>
+                        <td class="py-2 px-4">${student.nisn}</td>
+                        <td class="py-2 px-4">${student.kelas}</td>
+                        <td class="py-2 px-4">
+                            <button class="delete-student-btn text-red-500 hover:text-red-700" data-index="${index}">
+                                <i data-lucide="trash-2" class="h-5 w-5"></i>
+                            </button>
+                        </td>
+                    `;
+                    savedStudentsTableBody.appendChild(row);
+                });
+                lucide.createIcons();
+            }
+
+            addStudentBtn.addEventListener('click', () => {
+                const nama = studentNameHidden.value;
+                const nisn = nisnInput.value;
+                const kelas = kelasInput.value;
+
+                if (!nama) {
+                    alert('Silakan pilih siswa terlebih dahulu.');
+                    return;
+                }
+                
+                const isDuplicate = savedStudents.some(s => s.nama === nama);
+                if (isDuplicate) {
+                    alert('Siswa ini sudah ada dalam daftar.');
+                    return;
+                }
+
+                savedStudents.push({ nama, nisn, kelas, hafalan: [], materi: [], penilaian: {harian: {}, pts: {}, pas: {}}, catatan: '' });
+                renderSavedStudentsTable();
+                updateAllStudentDropdowns(savedStudents.length - 1);
+                renderHafalanMateriTab();
+
+                studentSearchInput.value = '';
+                studentNameHidden.value = '';
+                nisnInput.value = '';
+                kelasInput.value = '';
+            });
+
+            savedStudentsTableBody.addEventListener('click', function(e) {
+                const deleteBtn = e.target.closest('.delete-student-btn');
+                if (deleteBtn) {
+                    const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
+                    savedStudents.splice(indexToRemove, 1);
+                    renderSavedStudentsTable();
+                    updateAllStudentDropdowns();
+                    renderHafalanMateriTab();
+                }
+            });
+            
+            document.getElementById('update-student-data-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('update-student-data-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin mr-2 h-5 w-5"></i> Memuat...`;
+                lucide.createIcons();
+                btn.disabled = true;
+
+                await fetchStudentData();
+                alert('Daftar siswa dari Google Sheet telah diperbarui.');
+
+                btn.innerHTML = originalHtml;
+                lucide.createIcons();
+                btn.disabled = false;
+            });
+
+            const daftarSurat = [ "1. Al-Fatihah", "2. Al-Baqarah", "3. Ali 'Imran", "4. An-Nisa'", "5. Al-Ma'idah", "6. Al-An'am", "7. Al-A'raf", "8. Al-Anfal", "9. At-Taubah", "10. Yunus", "11. Hud", "12. Yusuf", "13. Ar-Ra'd", "14. Ibrahim", "15. Al-Hijr", "16. An-Nahl", "17. Al-Isra'", "18. Al-Kahf", "19. Maryam", "20. Ta Ha", "21. Al-Anbiya'", "22. Al-Hajj", "23. Al-Mu'minun", "24. An-Nur", "25. Al-Furqan", "26. Asy-Syu'ara'", "27. An-Naml", "28. Al-Qasas", "29. Al-'Ankabut", "30. Ar-Rum", "31. Luqman", "32. As-Sajdah", "33. Al-Ahzab", "34. Saba'", "35. Fatir", "36. Ya Sin", "37. As-Saffat", "38. Sad", "39. Az-Zumar", "40. Ghafir", "41. Fussilat", "42. Asy-Syura", "43. Az-Zukhruf", "44. Ad-Dukhan", "45. Al-Jasiyah", "46. Al-Ahqaf", "47. Muhammad", "48. Al-Fath", "49. Al-Hujurat", "50. Qaf", "51. Az-Zariyat", "52. At-Tur", "53. An-Najm", "54. Al-Qamar", "55. Ar-Rahman", "56. Al-Waqi'ah", "57. Al-Hadid", "58. Al-Mujadilah", "59. Al-Hasyr", "60. Al-Mumtahanah", "61. As-Saff", "62. Al-Jumu'ah", "63. Al-Munafiqun", "64. At-Taghabun", "65. At-Talaq", "66. At-Tahrim", "67. Al-Mulk", "68. Al-Qalam", "69. Al-Haqqah", "70. Al-Ma'arij", "71. Nuh", "72. Al-Jinn", "73. Al-Muzzammil", "74. Al-Muddassir", "75. Al-Qiyamah", "76. Al-Insan", "77. Al-Mursalat", "78. An-Naba'", "79. An-Nazi'at", "80. 'Abasa", "81. At-Takwir", "82. Al-Infitar", "83. Al-Mutaffifin", "84. Al-Insyiqaq", "85. Al-Buruj", "86. At-Tariq", "87. Al-A'la", "88. Al-Ghasyiyah", "89. Al-Fajr", "90. Al-Balad", "91. Asy-Syams", "92. Al-Lail", "93. Ad-Duha", "94. Asy-Syarh", "95. At-Tin", "96. Al-'Alaq", "97. Al-Qadr", "98. Al-Bayyinah", "99. Az-Zalzalah", "100. Al-'Adiyat", "101. Al-Qari'ah", "102. At-Takasur", "103. Al-'Asr", "104. Al-Humazah", "105. Al-Fil", "106. Quraisy", "107. Al-Ma'un", "108. Al-Kausar", "109. Al-Kafirun", "110. An-Nasr", "111. Al-Masad", "112. Al-Ikhlas", "113. Al-Falaq", "114. An-Nas" ];
+            const prefixedDaftarSurat = daftarSurat.map(s => `Q.S. ${s.split('. ')[1]}`);
+
+            function renderHafalanMateriTab() {
+                const container = document.getElementById('hafalan-materi-content');
+                container.innerHTML = '';
+
+                if (savedStudents.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-500 italic p-8 bg-white rounded-lg shadow">Tambahkan siswa di tab \'Input Siswa\' terlebih dahulu.</div>';
+                    return;
+                }
+
+                savedStudents.forEach((student, index) => {
+                    container.innerHTML += renderConfigForm(index);
+                });
+                
+                savedStudents.forEach((student, index) => {
+                    setupSearchableInput(`config-surat-search-${index}`, `config-surat-dropdown-${index}`, prefixedDaftarSurat, (value) => addHafalan(index, value));
+                    setupSearchableInput(`config-materi-search-${index}`, `config-materi-dropdown-${index}`, tahsinMateriList, (value) => addMateri(index, value));
+                    renderStudentConfigTables(index);
+                });
+
+                lucide.createIcons();
+            }
+
+            function renderConfigForm(studentIndex) {
+                const student = savedStudents[studentIndex];
+                return `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-teal-700 mb-4">${student.nama}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="config-surat-search-${studentIndex}" class="font-semibold mb-2 block">Input Surat Hafalan</label>
+                                <div class="relative">
+                                    <input type="text" id="config-surat-search-${studentIndex}" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Cari surat...">
+                                    <div id="config-surat-dropdown-${studentIndex}" class="absolute z-10 w-full bg-white border rounded-lg mt-1 hidden max-h-48 overflow-y-auto shadow-lg"></div>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-sm mb-2">Daftar Hafalan Tersimpan:</h4>
+                                    <table id="hafalan-table-${studentIndex}" class="w-full text-sm"></table>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="config-materi-search-${studentIndex}" class="font-semibold mb-2 block">Input Materi Tahsin</label>
+                                <div class="relative">
+                                    <input type="text" id="config-materi-search-${studentIndex}" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Cari materi...">
+                                    <div id="config-materi-dropdown-${studentIndex}" class="absolute z-10 w-full bg-white border rounded-lg mt-1 hidden max-h-48 overflow-y-auto shadow-lg"></div>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-sm mb-2">Daftar Materi Tersimpan:</h4>
+                                    <table id="materi-table-${studentIndex}" class="w-full text-sm"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function setupSearchableInput(inputId, dropdownId, dataList, onSelect) {
+                const searchInput = document.getElementById(inputId);
+                const dropdown = document.getElementById(dropdownId);
+                
+                const populate = (items) => {
+                    dropdown.innerHTML = '';
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                        div.textContent = item;
+                        div.addEventListener('click', () => {
+                            onSelect(item);
+                            searchInput.value = '';
+                            dropdown.classList.add('hidden');
+                        });
+                        dropdown.appendChild(div);
+                    });
+                };
+
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.toLowerCase();
+                    const filtered = dataList.filter(item => item.toLowerCase().includes(query));
+                    populate(filtered);
+                    dropdown.classList.remove('hidden');
+                });
+                 searchInput.addEventListener('focus', () => {
+                    populate(dataList);
+                    dropdown.classList.remove('hidden');
+                });
+            }
+
+            function addHafalan(studentIndex, surah) {
+                if (!surah) return;
+                const student = savedStudents[studentIndex];
+                if (!student.hafalan.includes(surah)) {
+                    student.hafalan.push(surah);
+                    renderStudentConfigTables(studentIndex);
+                }
+            }
+            function addMateri(studentIndex, materi) {
+                if (!materi) return;
+                const student = savedStudents[studentIndex];
+                if (!student.materi.includes(materi)) {
+                    student.materi.push(materi);
+                    renderStudentConfigTables(studentIndex);
+                }
+            }
+
+            function renderStudentConfigTables(studentIndex) {
+                 const student = savedStudents[studentIndex];
+                 const hafalanTable = document.getElementById(`hafalan-table-${studentIndex}`);
+                 const materiTable = document.getElementById(`materi-table-${studentIndex}`);
+
+                 hafalanTable.innerHTML = student.hafalan.map((h, i) => `<tr><td class="py-1">${h}</td><td class="text-right"><button data-type="hafalan" data-student-index="${studentIndex}" data-item-index="${i}" class="delete-config-item text-red-400 hover:text-red-600">&times;</button></td></tr>`).join('');
+                 materiTable.innerHTML = student.materi.map((m, i) => `<tr><td class="py-1">${m}</td><td class="text-right"><button data-type="materi" data-student-index="${studentIndex}" data-item-index="${i}" class="delete-config-item text-red-400 hover:text-red-600">&times;</button></td></tr>`).join('');
+
+                 hafalanTable.closest('div').addEventListener('click', (e) => {
+                     if (e.target.closest('.delete-config-item')) {
+                         const btn = e.target.closest('.delete-config-item');
+                         const studentIdx = parseInt(btn.dataset.studentIndex, 10);
+                         const itemIndex = parseInt(btn.dataset.itemIndex, 10);
+                         savedStudents[studentIdx].hafalan.splice(itemIndex, 1);
+                         renderStudentConfigTables(studentIdx);
+                     }
+                 });
+                 materiTable.closest('div').addEventListener('click', (e) => {
+                     if (e.target.closest('.delete-config-item')) {
+                          const btn = e.target.closest('.delete-config-item');
+                         const studentIdx = parseInt(btn.dataset.studentIndex, 10);
+                         const itemIndex = parseInt(btn.dataset.itemIndex, 10);
+                         savedStudents[studentIdx].materi.splice(itemIndex, 1);
+                         renderStudentConfigTables(studentIdx);
+                     }
+                 });
+                 updateAllStudentDropdowns(studentIndex);
+            }
+            
+            function createPenilaianSection(penilaianType) {
+                const container = document.getElementById(`penilaian-${penilaianType}-content`);
+                
+                container.innerHTML = `
+                    <div class="mb-6">
+                        <label for="student-select-${penilaianType}" class="block text-sm font-medium text-gray-700 mb-1">Pilih Siswa untuk Dinilai</label>
+                        <select id="student-select-${penilaianType}" class="student-select-penilaian w-full p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="">-- Pilih Siswa --</option>
+                        </select>
+                    </div>
+                    <div id="penilaian-form-${penilaianType}" class="hidden space-y-8">
+                        </div>
+                `;
+
+                const studentSelect = document.getElementById(`student-select-${penilaianType}`);
+                studentSelect.addEventListener('change', (e) => {
+                    const studentIndex = e.target.value;
+                    const formContainer = document.getElementById(`penilaian-form-${penilaianType}`);
+                    if (studentIndex !== "") {
+                        renderPenilaianFormForStudent(studentIndex, penilaianType);
+                        formContainer.classList.remove('hidden');
+                    } else {
+                        formContainer.classList.add('hidden');
+                    }
+                });
+            }
+            
+            function renderPenilaianFormForStudent(studentIndex, penilaianType) {
+                const student = savedStudents[studentIndex];
+                const formContainer = document.getElementById(`penilaian-form-${penilaianType}`);
+                 if (!student) {
+                    formContainer.innerHTML = '';
+                    return;
+                }
+
+                let hafalanOptions = student.hafalan.map(surah => `<option value="${surah}">${surah}</option>`).join('');
+                let tahsinInputs = tahsinMateriList.map(materi => {
+                    const isVisible = student.materi.includes(materi);
+                    const materiId = materi.replace(/\s+/g, '_').toLowerCase();
+                    return `
+                    <div id="container-tahsin_${materiId}_${penilaianType}" class="${isVisible ? '' : 'hidden'}">
+                        <label for="tahsin_${materiId}_${penilaianType}_${studentIndex}" class="block text-sm font-medium text-gray-600 mb-1">${materi}</label>
+                        <input type="number" data-aspek="${materi}" id="tahsin_${materiId}_${penilaianType}_${studentIndex}" min="0" max="100" class="tahsin-input-${penilaianType} w-full p-3 border border-gray-300 rounded-lg" placeholder="0-100">
+                    </div>
+                `}).join('');
+
+                formContainer.innerHTML = `
+                    <div class="p-6 bg-white rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-teal-700 mb-5 flex items-center"><i data-lucide="book-audio" class="mr-3"></i>1. Penilaian Hafalan Surat</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-1">
+                                <label for="surat_${penilaianType}_${studentIndex}" class="block text-sm font-medium text-gray-600 mb-1">Pilih Surat</label>
+                                <select id="surat_${penilaianType}_${studentIndex}" class="surat-select w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="">-- Pilih Surat --</option>
+                                    ${hafalanOptions}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nilai_makhraj_${penilaianType}_${studentIndex}" class="block text-sm font-medium text-gray-600 mb-1">Nilai Makhorijul Huruf</label>
+                                <input type="number" id="nilai_makhraj_${penilaianType}_${studentIndex}" min="0" max="100" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="0-100">
+                            </div>
+                            <div>
+                                <label for="nilai_tajwid_${penilaianType}_${studentIndex}" class="block text-sm font-medium text-gray-600 mb-1">Nilai Tajwid</label>
+                                <input type="number" id="nilai_tajwid_${penilaianType}_${studentIndex}" min="0" max="100" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="0-100">
+                            </div>
+                            <div>
+                                <label for="nilai_fashohah_${penilaianType}_${studentIndex}" class="block text-sm font-medium text-gray-600 mb-1">Nilai Fashohah</label>
+                                <input type="number" id="nilai_fashohah_${penilaianType}_${studentIndex}" min="0" max="100" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="0-100">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-2xl shadow-lg">
+                         <h3 class="text-xl font-bold text-teal-700 mb-5 flex items-center"><i data-lucide="book-marked" class="mr-3"></i>2. Penilaian Materi Tahsin</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            ${tahsinInputs}
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+                loadPenilaianData(studentIndex, penilaianType);
+                attachPenilaianEventListeners(studentIndex, penilaianType);
+            }
+
+            function attachPenilaianEventListeners(studentIndex, penilaianType) {
+                const form = document.getElementById(`penilaian-form-${penilaianType}`);
+                form.querySelectorAll('input, select').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        savePenilaianData(studentIndex, penilaianType);
+                    });
+                });
+            }
+
+            function savePenilaianData(studentIndex, penilaianType) {
+                const student = savedStudents[studentIndex];
+                if (!student) return;
+
+                const penilaianData = {
+                    surat: {
+                        nama: document.getElementById(`surat_${penilaianType}_${studentIndex}`).value,
+                        makhraj: document.getElementById(`nilai_makhraj_${penilaianType}_${studentIndex}`).value,
+                        tajwid: document.getElementById(`nilai_tajwid_${penilaianType}_${studentIndex}`).value,
+                        fashohah: document.getElementById(`nilai_fashohah_${penilaianType}_${studentIndex}`).value,
+                    },
+                    tahsin: {}
+                };
+
+                tahsinMateriList.forEach(materi => {
+                    const materiId = materi.replace(/\s+/g, '_').toLowerCase();
+                    const input = document.getElementById(`tahsin_${materiId}_${penilaianType}_${studentIndex}`);
+                    if (input) {
+                        penilaianData.tahsin[materi] = input.value;
+                    }
+                });
+
+                student.penilaian[penilaianType] = penilaianData;
+            }
+
+            function loadPenilaianData(studentIndex, penilaianType) {
+                const student = savedStudents[studentIndex];
+                const data = student.penilaian[penilaianType];
+                if (!data) return;
+
+                if (data.surat) {
+                    document.getElementById(`surat_${penilaianType}_${studentIndex}`).value = data.surat.nama || '';
+                    document.getElementById(`nilai_makhraj_${penilaianType}_${studentIndex}`).value = data.surat.makhraj || '';
+                    document.getElementById(`nilai_tajwid_${penilaianType}_${studentIndex}`).value = data.surat.tajwid || '';
+                    document.getElementById(`nilai_fashohah_${penilaianType}_${studentIndex}`).value = data.surat.fashohah || '';
+                }
+
+                if (data.tahsin) {
+                     tahsinMateriList.forEach(materi => {
+                        const materiId = materi.replace(/\s+/g, '_').toLowerCase();
+                        const input = document.getElementById(`tahsin_${materiId}_${penilaianType}_${studentIndex}`);
+                        if (input && data.tahsin[materi]) {
+                            input.value = data.tahsin[materi];
+                        }
+                    });
+                }
+            }
+
+
+            function updateAllStudentDropdowns(selectedIndex = null) {
+                const selects = document.querySelectorAll('.student-select-penilaian');
+                selects.forEach(select => {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">-- Pilih Siswa --</option>'; // Reset
+                    savedStudents.forEach((student, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = student.nama;
+                        select.appendChild(option);
+                    });
+                    if (selectedIndex !== null) {
+                        select.value = selectedIndex;
+                    } else {
+                         select.value = currentValue;
+                    }
+                    select.dispatchEvent(new Event('change')); 
+                });
+            }
+
+            createPenilaianSection('harian');
+            createPenilaianSection('pts');
+            createPenilaianSection('pas');
+            
+            
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            const pageTitle = document.getElementById('page-title');
+            const mainHeader = document.getElementById('main-header');
+            
+            const pageTitles = { 'input-siswa': 'Data Siswa', 'hafalan-materi': 'Pengaturan Hafalan & Materi', 'penilaian-harian': 'Penilaian Harian', 'penilaian-pts': 'Penilaian Tengah Semester (PTS)', 'penilaian-pas': 'Penilaian Akhir Semester (PAS)', 'catatan-guru': 'Catatan Perkembangan Siswa', 'export-rapor': 'Export Rapor' };
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebarLinks.forEach(lnk => lnk.classList.remove('sidebar-active', 'text-white'));
+                    tabPanels.forEach(panel => panel.classList.add('hidden'));
+                    
+                    link.classList.add('sidebar-active', 'text-white');
+                    const tabId = link.getAttribute('data-tab');
+                    document.getElementById(tabId + '-content').classList.remove('hidden');
+                    pageTitle.textContent = pageTitles[tabId];
+                    mainHeader.style.display = (tabId === 'export-rapor' || tabId === 'input-siswa') ? 'none' : 'flex';
+                });
+            });
+            
+            const studentSelectCatatan = document.getElementById('student-select-catatan');
+            studentSelectCatatan.addEventListener('change', () => {
+                const studentIndex = studentSelectCatatan.value;
+                if(studentIndex !== "" && savedStudents[studentIndex]) {
+                    document.getElementById('catatan_nama_siswa').textContent = savedStudents[studentIndex].nama;
+                    document.getElementById('catatan_otomatis').value = savedStudents[studentIndex].catatan || '';
+                } else {
+                     document.getElementById('catatan_nama_siswa').textContent = '-';
+                    document.getElementById('catatan_otomatis').value = '';
+                }
+            });
+
+            document.getElementById('generate-catatan-btn').addEventListener('click', () => {
+                const studentIndex = studentSelectCatatan.value;
+                if(studentIndex === "") {
+                    alert("Pilih siswa terlebih dahulu.");
+                    return;
+                }
+                const student = savedStudents[studentIndex];
+                const namaSiswa = student.nama;
+                
+                const catatanTemplate = `Alhamdulillah Ananda ${namaSiswa} memiliki adab yang baik ketika belajar. Ananda sudah mampu menghafal {surat} dengan baik. Ananda perlu meningkatkan kembali hafalannya dan memperbaiki bacaan {aspek_tahsin}. Perbanyak berlatih tahsin di rumah dan dilancarkan kembali hafalannya. Semangat Ananda hebat semoga Allah Swt. mudahkan Ananda mempelajari ilmu Al-Qur'an.`;
+                const suratPAS = student.penilaian?.pas?.surat?.nama?.split('Q.S. ')[1] || 'surat yang dipelajari';
+                
+                let aspekPerluPerbaikan = [];
+                if(student.penilaian?.pas?.tahsin) {
+                    for(const [aspek, nilai] of Object.entries(student.penilaian.pas.tahsin)) {
+                        if (parseInt(nilai) < 90) aspekPerluPerbaikan.push(aspek);
+                    }
+                }
+                
+                const catatanFinal = catatanTemplate
+                    .replace('{surat}', `Q.S. ${suratPAS}`)
+                    .replace('{aspek_tahsin}', aspekPerluPerbaikan.length > 0 ? aspekPerluPerbaikan.join(', ') : 'semua aspek tahsin');
+                
+                document.getElementById('catatan_otomatis').value = catatanFinal;
+                student.catatan = catatanFinal;
+            });
+
+            document.getElementById('process-rapor-btn').addEventListener('click', () => {
+                const studentIndex = document.getElementById('student-select-export').value;
+                 if(studentIndex === "") {
+                    alert("Pilih siswa terlebih dahulu untuk menampilkan rapor.");
+                    return;
+                }
+                const student = savedStudents[studentIndex];
+
+                const nisn = student.nisn;
+                const kelas = student.kelas;
+                const namaSiswa = student.nama;
+                const semester = document.getElementById('semester').value;
+                const catatanGuru = student.catatan || '';
+                
+                const tahfidzData = {
+                    surat: student.penilaian?.pas?.surat?.nama || '-',
+                    makhraj: student.penilaian?.pas?.surat?.makhraj || '0',
+                    tajwid: student.penilaian?.pas?.surat?.tajwid || '0',
+                    fashohah: student.penilaian?.pas?.surat?.fashohah || '0',
+                };
+
+                let tahsinRows = '';
+                const getKeterangan = (nilai) => {
+                    if (nilai >= 90) return 'Sangat Baik';
+                    if (nilai >= 80) return 'Baik';
+                    if (nilai >= 70) return 'Cukup';
+                    return 'Perlu Bimbingan';
+                };
+                
+                if (student.penilaian?.pas?.tahsin) {
+                    let index = 1;
+                    for (const [aspek, nilai] of Object.entries(student.penilaian.pas.tahsin)) {
+                        if(student.materi.includes(aspek)) { // Hanya tampilkan materi yang dipilih
+                             tahsinRows += `
+                                <tr class="border-b border-black">
+                                    <td class="p-2 border border-black text-center">${index++}</td>
+                                    <td class="p-2 border border-black">${aspek}</td>
+                                    <td class="p-2 border border-black text-center">${nilai || 0}</td>
+                                    <td class="p-2 border border-black text-center">${getKeterangan(nilai || 0)}</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+
+                const tanggalRapor = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                const raporHTML = `
+                    <div class="font-sans text-sm" style="font-family: 'Times New Roman', Times, serif; font-size: 12pt;">
+                        <div class="text-center font-bold">
+                            <p>LAPORAN HASIL BELAJAR SEMESTER GENAP</p>
+                            <p>TAHFIDZUL QUR'AN</p>
+                            <p>TAHUN PELAJARAN 2024/2025</p>
+                        </div>
+                        <div class="mt-8 mb-4">
+                            <table class="w-full">
+                                <tr>
+                                    <td class="w-1/4">Nama Siswa</td>
+                                    <td class="w-2/4">: ${namaSiswa}</td>
+                                    <td class="w-1/6">Kelas</td>
+                                    <td>: ${kelas}</td>
+                                </tr>
+                                <tr>
+                                    <td>NIS/NISN</td>
+                                    <td>: ${nisn}</td>
+                                    <td>Semester</td>
+                                    <td>: ${semester}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <p class="font-bold">A. TAHFIDZUL QUR'AN</p>
+                        <table class="w-full border border-black border-collapse mt-2 text-center">
+                            <thead class="bg-gray-200 font-bold print-bg-transparent">
+                                <tr class="border-b border-black">
+                                    <td class="p-2 border border-black">NO</td>
+                                    <td class="p-2 border border-black">NAMA SURAT</td>
+                                    <td class="p-2 border border-black">MAKHORIJUL HURUF</td>
+                                    <td class="p-2 border border-black">TAJWID</td>
+                                    <td class="p-2 border border-black">FASHOHAH</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-black">
+                                    <td class="p-2 border border-black">1</td>
+                                    <td class="p-2 border border-black text-left">${tahfidzData.surat}</td>
+                                    <td class="p-2 border border-black">${tahfidzData.makhraj}</td>
+                                    <td class="p-2 border border-black">${tahfidzData.tajwid}</td>
+                                    <td class="p-2 border border-black">${tahfidzData.fashohah}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="font-bold mt-6">B. TAHSIN (UTSMANI JILID 3)</p>
+                        <table class="w-full border border-black border-collapse mt-2 text-center">
+                            <thead class="bg-gray-200 font-bold print-bg-transparent">
+                                <tr class="border-b border-black">
+                                    <td class="p-2 border border-black">NO</td>
+                                    <td class="p-2 border border-black">ASPEK PENILAIAN</td>
+                                    <td class="p-2 border border-black">NILAI</td>
+                                    <td class="p-2 border border-black">KETERANGAN</td>
+                                </tr>
+                            </thead>
+                            <tbody>${tahsinRows}</tbody>
+                        </table>
+
+                        <p class="font-bold mt-6">CATATAN GURU</p>
+                        <div class="border border-black p-2 mt-2 min-h-[100px]">
+                            <p>${catatanGuru.replace(/\n/g, '<br>')}</p>
+                        </div>
+                        
+                        <div class="mt-12 flex justify-between">
+                             <div class="text-center">
+                                <p>Orangtua/Wali Murid</p>
+                                <div class="h-20"></div>
+                                <p>(.....................)</p>
+                            </div>
+                            <div class="text-center">
+                                <p>Diberikan di: Jakarta</p>
+                                <p>Pada Tanggal: ${tanggalRapor}</p>
+                                <br/>
+                                <p>Koordinator Tahsin Tahfidz</p>
+                                <div class="h-16"></div>
+                                <p class="font-bold underline">Ferani Puteri Habibi, S.Pd.</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 flex justify-center">
+                            <div class="text-center">
+                                <p>Ka.SDIT Insan Madani Jakarta</p>
+                                <div class="h-16"></div>
+                                <p class="font-bold underline">Budy Hartono, S.Ag., MA.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                
+                document.getElementById('rapor-preview-container').innerHTML = raporHTML;
+                const printArea = document.getElementById('rapor-print-area');
+                printArea.innerHTML = raporHTML;
+            });
+            
+            document.getElementById('print-rapor-btn').addEventListener('click', () => {
+                window.print();
+            });
+            
+            // Inisialisasi pengambilan data awal
+            (async () => {
+                await fetchTahsinMateri();
+                await fetchStudentData();
+            })();
+        } // AKHIR DARI FUNGSI initializeApp()
+    </script>
+</body>
+</html>
